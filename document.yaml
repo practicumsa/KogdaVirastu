@@ -1,0 +1,960 @@
+openapi: 3.0.0
+info:
+  title: 'Kogda-Virastu API '
+  description: API бэкенд-сервиса проекта "КогдаВырасту"
+  version: 1.0.0
+servers:
+- url: http://localhost:3000
+paths:
+  /users:
+    get:
+      tags:
+      - users
+      summary: Получить список пользователей
+      description: ""
+      parameters: []
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+      - users
+      summary: Зарегистрировать новового пользователя
+      description: ""
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserData'
+        required: true
+      responses:
+        "200":
+          description: Профиль пользователя успешно получен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        "400":
+          description: Bad Request
+  /users/username/{username}:
+    get:
+      tags:
+      - users
+      summary: Получить профиль пользователя
+      description: ""
+      parameters:
+      - name: username
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+      security:
+      - bearerAuth: []
+  /users/{id}:
+    get:
+      tags:
+      - users
+      summary: Получить профиль пользователя
+      description: ""
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - users
+      summary: Удалить пользователя
+      description: ""
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Профиль пользователя успешно удален
+        "401":
+          description: Unauthorized
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - users
+      summary: Обновить профиль текущего пользователя
+      description: ""
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserData'
+        required: true
+      responses:
+        "200":
+          description: Профиль пользователя успешно получен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        "401":
+          description: Unauthorized
+      security:
+      - bearerAuth: []
+  /users/me:
+    get:
+      tags:
+      - users
+      summary: Получить профиль текущего пользователя
+      description: ""
+      parameters: []
+      responses:
+        "200":
+          description: Профиль пользователя успешно получен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        "401":
+          description: Unauthorized
+      security:
+      - bearerAuth: []
+  /users/subscriptions/user/{id}:
+    post:
+      tags:
+      - users
+      summary: Подписаться на пользователя
+      description: ""
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "201":
+          description: Успешная подписка
+        "401":
+          description: Unauthorized
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - users
+      summary: Отписаться от пользователя
+      description: ""
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "201":
+          description: Успешная отписка
+        "401":
+          description: Unauthorized
+      security:
+      - bearerAuth: []
+  /auth-tokens:
+    post:
+      tags:
+      - auth
+      summary: Авторизоваться (залогиниться)
+      description: ""
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthData'
+        required: true
+      responses:
+        "200":
+          description: Токены успешно получены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokensResponse'
+        "400":
+          description: Bad Request
+  /articles/:
+    get:
+      tags:
+      - article
+      summary: Получить список статей
+      description: ""
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: offset
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: tags
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            example: опыт
+      - name: sort
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: '#/components/schemas/SortOption'
+      - name: author
+        in: query
+        description: "передайте id пользователя, возвращает статьи которые он создал"
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: isFavourite
+        in: query
+        description: "передайте id пользователя, возвращает статьи которые он лайкнул"
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Article'
+    post:
+      tags:
+      - article
+      summary: Cоздать новую публикацию
+      description: ""
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArticleData'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        "401":
+          description: Unauthorized
+        "409":
+          description: Конфликт при создании статьи
+      security:
+      - bearerAuth: []
+  /articles/slug/{slug}:
+    get:
+      tags:
+      - article
+      summary: Получить публикацию с указанным slug
+      description: ""
+      parameters:
+      - name: slug
+        in: path
+        description: slug статьи
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+  /articles/{id}:
+    get:
+      tags:
+      - article
+      summary: Получить публикацию с указанным Id
+      description: ""
+      parameters:
+      - name: id
+        in: path
+        description: id статьи
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+    delete:
+      tags:
+      - article
+      summary: Удалить публикацию с указанным Id
+      description: ""
+      parameters:
+      - name: id
+        in: path
+        description: id статьи
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Статья удалена
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+        "403":
+          description: Forbidden
+      security:
+      - bearerAuth: []
+    patch:
+      tags:
+      - article
+      summary: Обновить публикацию
+      description: ""
+      parameters:
+      - name: id
+        in: path
+        description: id статьи
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArticleData'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        "401":
+          description: Unauthorized
+      security:
+      - bearerAuth: []
+  /articles/{id}/favourites:
+    post:
+      tags:
+      - article
+      summary: Добавить публикацию в избранное
+      description: ""
+      parameters:
+      - name: id
+        in: path
+        description: id статьи
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+      security:
+      - bearerAuth: []
+    delete:
+      tags:
+      - article
+      summary: Удалить публикацию из избранного
+      description: ""
+      parameters:
+      - name: id
+        in: path
+        description: ID статьи
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not found
+      security:
+      - bearerAuth: []
+  /articles/{id}/comments:
+    get:
+      tags:
+      - article
+      summary: Получить комментарии статьи
+      description: ""
+      parameters:
+      - name: id
+        in: path
+        description: id статьи
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+      security:
+      - bearerAuth: []
+    post:
+      tags:
+      - article
+      summary: Добавить новый комментарий к статье
+      description: ""
+      parameters:
+      - name: id
+        in: path
+        description: id статьи
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentData'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        "400":
+          description: Article doesnt exist
+        "401":
+          description: Unauthorized
+      security:
+      - bearerAuth: []
+  /articles/{id}/comments/{comment}:
+    delete:
+      tags:
+      - article
+      summary: Удалить комментарий
+      parameters:
+      - name: id
+        in: path
+        description: id статьи
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: comment
+        in: path
+        description: id комментария
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Not found
+        "403":
+          description: Forbidden
+      security:
+      - bearerAuth: []
+  /tags/:
+    get:
+      tags:
+      - tags
+      summary: Получить общий список тегов
+      description: ""
+      parameters: []
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+      - tags
+      summary: Создать новый тег
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagData'
+        required: true
+      responses:
+        "201":
+          description: Тег успешно создан
+        "400":
+          description: Tag already exists
+        "401":
+          description: Unauthorized'
+      security:
+      - bearerAuth: []
+  /tags/{idTag}:
+    get:
+      tags:
+      - tags
+      summary: Получить тег по id
+      description: ""
+      parameters:
+      - name: idTag
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not found
+    delete:
+      tags:
+      - tags
+      summary: Удалить тег по id
+      description: ""
+      parameters:
+      - name: idTag
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Удаление успешно
+        "401":
+          description: Unauthorized
+        "403":
+          description: Нет прав на удаление
+        "404":
+          description: Not found
+      security:
+      - bearerAuth: []
+components:
+  schemas:
+    User:
+      required:
+      - email
+      - password
+      - salt
+      - username
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 6671491e62f2eacd62af0a1b
+        username:
+          type: string
+          example: amazinguser
+        bio:
+          type: string
+          example: Описание
+        image:
+          type: string
+          example: hhttps://i.pravatar.cc/300?img=1
+        password:
+          type: string
+          example: n0t$r0ngp@ssw0rd
+        salt:
+          type: string
+          description: Поле генерируется автоматически перед созданием пользователя
+          example: 6671491e62f2eacd6
+        email:
+          type: string
+          example: some@ya.ru
+        nickname:
+          type: string
+          example: tiredcoder
+        usersSubscriptions:
+          type: array
+          example: []
+          items: {}
+        tagsSubscriptions:
+          type: array
+          example: []
+          items: {}
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRoles'
+        id:
+          type: string
+          example: 6671491e62f2eacd62af0a1b
+      description: Модель пользователя
+      xml:
+        name: User
+    UserData:
+      required:
+      - email
+      - nickname
+      - password
+      - username
+      type: object
+      properties:
+        username:
+          type: string
+          example: amazinguser
+        email:
+          type: string
+          example: some@ya.ru
+        password:
+          type: string
+          example: n0t$r0ngp@ssw0rd
+        nickname:
+          type: string
+          example: tiredcoder
+      xml:
+        name: UserData
+    AuthData:
+      type: object
+      properties:
+        email:
+          type: string
+          example: some@ya.ru
+        password:
+          type: string
+          example: n0t$r0ngp@ssw0rd
+      xml:
+        name: AuthData
+    AuthTokens:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 666ae4153ac7c8e1377d7245
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWF0IjoxNzE4ODA0MTU0LCJleHAiOjE3MTg4MDU5NTQsInN1YiI6IjY2NmFlNDE1NjM1OTA3ZTIwYzkyYWVlYSJ9.aP-3dlj84ZFuZjTNSZ1j34V8HmUw305HPW81DUkGGn4
+      description: Модель рефреш токена
+      xml:
+        name: AuthData
+    TokensResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFtYXppbmd1c2VyIiwiaWF0IjoxNzE4NzAwOTQzLCJleHAiOjE3MTg3MDI5NDMsInN1YiI6IjY2NzE0OTFlNjJmMmVhY2Q2MmFmMGExYiJ9.8KfV33ap-Ok166IKiXqD_Zo_qpSSgvUxxeVDRjNDCvE
+        refresh_token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFtYXppbmd1c2VyIiwiaWF0IjoxNzE4NzAwOTQzLCJleHAiOjE3MTg3MDI3NDMsInN1YiI6IjY2NzE0OTFlNjJmMmVhY2Q2MmFmMGExYiJ9.HPbfN6K8Qfha4aqISdfA-a-fcd2bhtnmd3bYCB6tifo
+        expires_in:
+          type: number
+          example: 3000
+        token_type:
+          type: string
+          example: bearer
+      xml:
+        name: TokensData
+    UserProfile:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 6671491e62f2eacd62af0a1b
+        username:
+          type: string
+          example: amazinguser
+        email:
+          type: string
+          example: some@ya.ru
+        nickname:
+          type: string
+          example: tiredcoder
+        usersSubscriptions:
+          type: array
+          example: []
+          items: {}
+        tagsSubscriptions:
+          type: array
+          example: []
+          items: {}
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserRoles'
+        id:
+          type: string
+          example: 6671491e62f2eacd62af0a1b
+      xml:
+        name: UserProfile
+    ArticleData:
+      required:
+      - body
+      - description
+      - title
+      type: object
+      properties:
+        title:
+          type: string
+          example: Тестовая запись
+        slug:
+          type: string
+          example: testovaya-zapis-szpp6o
+        description:
+          type: string
+          example: О чем-то интересном
+        body:
+          type: string
+          example: А это текст статьи 2
+        image:
+          type: string
+          example: https://avatars.mds.yandex.net/get-lpc/10704932/cad18c8d-76a7-4523-a5da-52ea024f10a2/width_1280_q70
+        tags:
+          type: array
+          example:
+          - теги
+          items:
+            type: string
+      xml:
+        name: ArticleData
+    TagData:
+      required:
+      - label
+      type: object
+      properties:
+        label:
+          type: string
+          example: практика
+      xml:
+        name: TagData
+    Tag:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 666ff890c4bdb5fb6728b872
+        label:
+          uniqueItems: true
+          type: string
+          example: практика
+        createdAt:
+          type: string
+          example: 2022-06-07T00:20:09.388Z
+        updatedAt:
+          type: string
+          example: 2022-06-07T00:20:09.388Z
+        _id:
+          type: string
+          example: 666ff890c4bdb5fb6728b872
+      description: Модель тега
+      xml:
+        name: Tag
+    Comment:
+      required:
+      - author
+      - body
+      - state
+      type: object
+      properties:
+        id:
+          type: string
+          example: 62a3392219fbd7ec26ff90a4
+        parent:
+          type: string
+          example: 62a3392219fbd7ec26ff90a4
+        children:
+          type: array
+          example: []
+          items:
+            $ref: '#/components/schemas/Comment'
+        body:
+          type: string
+          example: Тест сообщения
+        createdAt:
+          type: string
+          example: 2022-06-10T12:29:22.830Z
+        state:
+          $ref: '#/components/schemas/PublishState'
+        author:
+          $ref: '#/components/schemas/UserProfile'
+        article:
+          $ref: '#/components/schemas/Article'
+      description: Модель комментария
+      xml:
+        name: Comment
+    CommentData:
+      required:
+      - body
+      type: object
+      properties:
+        body:
+          type: string
+          example: Тест сообщения
+    Article:
+      required:
+      - author
+      - body
+      - description
+      - link
+      - slug
+      - state
+      - title
+      type: object
+      properties:
+        id:
+          type: string
+          example: 6672a446848a6ac4e852b1ad
+        _id:
+          type: string
+          example: 6672a446848a6ac4e852b1ad
+        slug:
+          uniqueItems: true
+          type: string
+          example: testovaya-zapis-szpp6o
+        link:
+          uniqueItems: true
+          type: string
+          example: /article/testovaya-zapis-szpp6o
+        image:
+          type: string
+          example: https://avatars.mds.yandex.net/get-lpc/10704932/cad18c8d-76a7-4523-a5da-52ea024f10a2/width_1280_q70
+        title:
+          type: string
+          example: Тестовая запись
+        description:
+          type: string
+          example: Превью статьи
+        body:
+          type: string
+          example: А это текст статьи
+        state:
+          $ref: '#/components/schemas/PublishState'
+        createdAt:
+          type: string
+          example: 2022-06-07T00:20:09.388Z
+        updatedAt:
+          type: string
+          example: 2022-06-13T12:49:06.305Z
+        tags:
+          type: array
+          example: []
+          items:
+            $ref: '#/components/schemas/Tag'
+        favoredBy:
+          type: array
+          items:
+            type: string
+            example: 666ae941635907e20c92af37
+        favoredCount:
+          type: number
+          example: 1
+          default: 0
+        author:
+          $ref: '#/components/schemas/UserProfile'
+      description: Модель статьи
+      xml:
+        name: Article
+    UserRoles:
+      type: string
+      enum:
+      - user
+      - admin
+    SortOption:
+      type: string
+      enum:
+      - recent
+      - popular
+    PublishState:
+      type: string
+      enum:
+      - draft
+      - published
+      - pending
+      - declined
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
